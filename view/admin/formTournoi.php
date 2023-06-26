@@ -27,8 +27,7 @@
             </td>
             <td>
                 <select class="form-control" name="categorie" required>
-                    <?php
-                    foreach ($categorie as $categorie) : ?>
+                    <?php foreach ($categories ?? [] as $categorie) : ?>
                         <option value="<?= $categorie ?>">
                             <?= $categorie ?>
                         </option>

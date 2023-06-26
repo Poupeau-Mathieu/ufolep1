@@ -12,22 +12,30 @@
 <br>
 
 <table class="data-table sober">
-    <tr>
-        <td>
-            Tournoi 2023 Départemental Division 1
-            <a href="<?= BASE_URL . DS . "admin" . DS . "listeMatchIndividuel/2" ?>" class="button primarybuttonBlue">
-                Modifier
-            </a>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            Tournoi 2023 Départemental Division 1
-            <a href="<?= BASE_URL . DS . "admin" . DS . "listeMatchIndividuel/1" ?>" class="button primarybuttonBlue">
-                Modifier
-            </a>
-        </td>
-    </tr>
+    <thead>
+        <tr>
+            <th>Nom du tournoi</th>
+            <th>Lieu</th>
+            <th>Catégorie</th>
+            <th>Date du tournoi</th>
+            <th>Modifier</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($Tournois as $tournoi) { ?>
+            <tr>
+                <td><?= $tournoi['libelle'] ?></td>
+                <td><?= $tournoi['lieu'] ?></td>
+                <td><?= $tournoi['categorie'] ?></td>
+                <td><?= $tournoi['dateTournoi'] ?></td>
+                <td>
+                    <a href="<?= BASE_URL . DS . "admin" . DS . "listeMatchIndividuel/" . $tournoi['idTournoi'] ?>" class="button primarybuttonBlue">
+                        Ajouter un match
+                    </a>
+                </td>
+            </tr>
+        <?php } ?>
+    </tbody>
 </table>
 
 <?php require_once ROOT . DS . "view" . DS . "layout" . DS . "admin" . DS . "_admin_bottom.php"; ?>

@@ -1,10 +1,15 @@
 <?php require_once ROOT . DS . "view" . DS . "layout" . DS . "admin" . DS . "_admin_top.php"; ?>
 
 <h2>Nouveau Match</h2>
+<div>
+    <h2><?php echo $tournoi->libelle; ?></h2>
+    <p>Date : <?php echo $tournoi->dateTournoi; ?></p>
+    <p>Lieu : <?php echo $tournoi->lieu; ?></p>
+    <p>Catégorie : <?php echo $tournoi->categorie; ?></p>
 <hr>
 
 <table class="form-table">
-    <form method="POST">
+    <form method="POST" action="<?= BASE_URL . DS . "admin/formMatchindividuel" ?>">
         <tr>
             <td><label for="JR">Joueur 1</label></td>
             <td><input class="form-control" type="text" name="JR" value="" required/></td>
@@ -30,12 +35,14 @@
                     <option value="32F">32F</option>
                     <option value="16F">16F</option>
                     <option value="8F">8F</option>
-                    <option value="0F">0F</option>
+                    <option value="QF">QF</option>
+                    <option value="DF">DF</option>
+                    <option value="F">F</option>
                 </select>
             </td>
         </tr>
         <tr>
-            <td><label for="forfait">Forfait</label></td>
+            <td ><label> forfait ?</label></td>
             <fieldset>
                 <td><input type="radio" name="forfait" value="A">Forfait club visité</td>
                 <td><input type="radio" name="forfait" value="J" checked>Match joué</td>
@@ -44,7 +51,8 @@
         </tr>
         <tr>
             <td colspan="2">
-                <a class="button primarybuttonWhite" href="<?= BASE_URL . DS . "admin/listeTournoi/$lastId" ?>">Annuler</a>
+                <input type="hidden" name="idTournoi" value="<?= isset($tournoi) ? $tournoi->idTournoi : '' ?>">
+                <a class="button primarybuttonWhite" href="<?= BASE_URL . DS . "admin/listeTournoi" ?>">Annuler</a>
                 <input class="primarybuttonBlue" type="submit" value="Enregistrer" name="formMatchindividuel" />
             </td>
         </tr>

@@ -1620,23 +1620,49 @@ class AdminController extends Controller
     function listeTournoi()
     {
         $this->filterAndGetUser(1);
-
+    
         $this->modMatch = $this->loadModel('MatchIndividuel');
         $orderby = "match_individuel.idmatch";
         $params = array();
-        $params = array('orderby'=>$orderby);
+        $params = array('orderby' => $orderby);
         $d['Matchs'] = $this->modMatch->find($params);
-       // var_dump ($d['equipes']);
+    
+        $this->modTournoi = $this->loadModel('Tournoi');
+        $tournois = $this->modTournoi->find();
+        $d['Tournois'] = json_decode(json_encode($tournois), true);
 
         if (empty($d['Matchs'])) {
             $this->e404('Page introuvable');
         }
-
+    
         $this->set($d);
         $this->render("listeTournoi");
-    }
-
+    }    
+    
     public function listeMatchIndividuel($idTournoi)
+    {
+        $this->filterAndGetUser(1);
+
+        if ($idTournoi === null) {
+            $this->e404('Tournoi introuvable');
+        }
+
+        $tournoiModele = $this->loadModel("Tournoi");
+        $tournoi = $tournoiModele->getTournoiById($idTournoi);
+        
+        if (!$tournoi) {
+            $this->e404('Tournoi introuvable');
+        }
+
+        $matchModele = $this->loadModel('MatchIndividuel');
+        $matches = $matchModele->find(array('conditions' => array('idTournoi' => $idTournoi), 'orderby' => 'idMatch'));
+
+        $this->set('matches', $matches);
+        $this->set('tournoi', $tournoi);
+        $this->render("listeMatchIndividuel");
+    }
+    
+    public function FormDetailMatch($idMatch)
     {
 
         $this->filterAndGetUser(1);
@@ -1646,19 +1672,19 @@ class AdminController extends Controller
         $params = array();
         $params = array('orderby'=>$orderby);
         $d['Matchs'] = $this->modMatch->find($params);
-       // var_dump ($d['equipes']);
 
-        if ($idTournoi === null) {
-            $this->e404('Tournoi introuvable');
+        if ($idMatch === null) {
+            $this->e404('Match introuvable');
         }
 
         $matchModel = $this->loadModel("MatchIndividuel");
-        $matches = $matchModel->find(array('conditions' => array('idTournoi' => $idTournoi), 'orderby' => 'idMatch'));
+        $matches = $matchModel->find(array('conditions' => array('idMatch' => $idMatch), 'orderby' => 'idMatch'));
 
 
         $this->set('matches', $matches);
-        $this->render("listeMatchIndividuel");
+        $this->render("FormDetailMatch");
     }
+
     public function formMatchindividuel()
     {
         $this->filterAndGetUser(2);
@@ -1675,7 +1701,6 @@ class AdminController extends Controller
             $idTournoi = $_POST["idTournoi"];
             $lastId = 0;
 
-
             $data = [
                 "JR" => $JR,
                 "JV" => $JV,
@@ -1685,10 +1710,10 @@ class AdminController extends Controller
             ];
             $lastId = $MatchindividuelModele->insert(['JR', 'JV', 'date', 'lieu', 'idTournoi'], $data);
 
-            $this->redirect("/admin/listeMatchIndividuel/$lastId");
-        } else {
-            $d["Matchindividuel"] = [];
-            $d["joueurs"] = $joueurs;
+                $this->redirect("/admin/listeMatchIndividuel?idTournoi=$idTournoi");        
+            } else {
+                $d["Matchindividuel"] = [];
+                $d["joueurs"] = $joueurs;
 
             if (isset($_GET["idmatch"])) {
                 $idmatch = $_GET["idmatch"];
@@ -1702,46 +1727,41 @@ class AdminController extends Controller
     function formTournoi()
     {
         $this->filterAndGetUser(2);
-    
+
         if (isset($_POST["creerTournoi"])) {
             $TournoiModele = $this->loadModel("Tournoi");
-    
+
             $libelle = $_POST["libelle"];
             $dateTournoi = $_POST["dateTournoi"];
             $lieu = $_POST["lieu"];
             $jugeArbitre = $_POST["jugeArbitre"];
             $categorie = $_POST["categorie"];
-    
+
             $valid1 = filter_var_array(
                 [
                     "libelle" => $libelle,
                     "dateTournoi" => $dateTournoi,
                     "lieu" => $lieu,
                     "jugeArbitre" => $jugeArbitre,
-                    "categorie" => $categorie,
+                    "categorie" => $categorie
                 ],
                 [
                     "libelle" => FILTER_SANITIZE_STRING,
-                    "dateTournoi" => FILTER_SANITIZE_NUMBER_INT,
+                    "dateTournoi" => FILTER_SANITIZE_STRING,
                     "lieu" => FILTER_SANITIZE_STRING,
                     "jugeArbitre" => FILTER_SANITIZE_STRING,
                     "categorie" => FILTER_SANITIZE_STRING
-            
                 ]
             );
-                
+
             $libelle = Security::shorten($libelle, 64);
-    
-            $categorie = Parser::getEnumValuesFromRaw(
-                $TournoiModele->getColumnFromTable("tournoi", "categorie")["Type"]
-            );
-    
+
             $categoriesPossibles = Parser::getEnumValuesFromRaw(
                 $TournoiModele->getColumnFromTable("tournoi", "categorie")["Type"]
             );
-    
+
             $valid2 = in_array($categorie, $categoriesPossibles);
-    
+
             if ($valid1 && $valid2) {
                 $TournoiModele->insertAI(
                     ["libelle", "categorie", "dateTournoi", "lieu", "jugeArbitre"],
@@ -1753,13 +1773,13 @@ class AdminController extends Controller
             }
         } else {
             $TournoiModele = $this->loadModel("Tournoi");
-    
-            $d["categorie"] = Parser::getEnumValuesFromRaw(
+
+            $d["categories"] = Parser::getEnumValuesFromRaw(
                 $TournoiModele->getColumnFromTable("tournoi", "categorie")["Type"]
             );
-    
+
             $this->set($d);
             $this->render("formTournoi");
         }
-    }    
+    }
 }
